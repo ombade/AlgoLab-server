@@ -27,9 +27,15 @@ export default class Server {
       .use(morgan(__PROD__ ? 'tiny' : 'dev'))
       .use(redirectMiddleware())
       .use(bodyParser.json())
-      .use(bodyParser.urlencoded({extended: true}))
+      .use(bodyParser.urlencoded({ extended: true }))
       .use('/api', this.getApiRouter())
       .use(frontendMiddleware(this));
+
+    // Add a base route to confirm the server is working
+    this.app.get('/', (req: Request, res: Response) => {
+      res.send('Server is working properly');
+    });
+
     if (this.webhook) {
       this.app.use(this.webhook);
     }
@@ -37,7 +43,7 @@ export default class Server {
 
     if (this.webhook) {
       this.webhook.on('push', async (repo: string, data: any) => {
-        const {ref, head_commit} = data;
+        const { ref, head_commit } = data;
         if (ref !== 'refs/heads/master') return;
         if (!head_commit) throw new Error('The `head_commit` is empty.');
 
